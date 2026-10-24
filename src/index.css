@@ -24,33 +24,8 @@
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 18px rgba(16, 24, 40, 0.05);
   --serif: 'Source Serif 4', Georgia, serif;
   --sans: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1220;
-    --surface: #161d2e;
-    --surface-2: #1c2438;
-    --ink: #eef2ff;
-    --text: #dfe4ee;
-    --muted: #98a2b8;
-    --line: #273149;
-    --green: #2fb563;
-    --green-dark: #1f9a4f;
-    --green-soft: #173726;
-    --navy: #7ea2ff;
-    --navy-soft: #1d2a4d;
-    --yellow-soft: #3a3210;
-    --teal-soft: #15332e;
-    --red: #ff7a70;
-    --red-soft: #3b1d1d;
-    --grid: #222b40;
-    --grid-strong: #35405a;
-    --hover: rgba(255, 255, 255, 0.06);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    color-scheme: dark;
-  }
+  /* Toujours en mode clair, même si l'appareil est en mode sombre. */
+  color-scheme: only light;
 }
 
 * {
@@ -464,12 +439,6 @@ a.card:hover {
 .tag-soft {
   background: var(--surface-2);
   color: var(--muted);
-}
-
-@media (prefers-color-scheme: dark) {
-  .tag-warn {
-    color: var(--yellow);
-  }
 }
 
 .level-badge {
@@ -1840,15 +1809,6 @@ a.card:hover {
   --ph-learn: #f5c518;
   --ph-review: #2f6fd6;
   --ph-master: #12873d;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ph-new: #4a5672;
-    --ph-learn: #e0b416;
-    --ph-review: #6c9bff;
-    --ph-master: #2fb563;
-  }
 }
 
 .ph-nouveau {

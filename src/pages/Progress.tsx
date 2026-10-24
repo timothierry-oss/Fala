@@ -4,6 +4,7 @@ import { themes, allVocab } from '../data/themes'
 import type { Skill } from '../data/types'
 import { LevelBadge, PageHeader, ProgressBar } from '../components/ui'
 import { VoiceCheck } from '../components/VoiceCheck'
+import { Backup } from '../components/Backup'
 import { addDays, dayKey, shortDate } from '../lib/dates'
 import { LEVELS, levelInfo, levelValue } from '../lib/levels'
 import {
@@ -261,7 +262,7 @@ export function Progress() {
             Réinitialiser
           </button>
         </div>
-        <p className="muted small">Ta progression est enregistrée uniquement sur cet appareil.</p>
+        <Backup />
       </section>
     </div>
   )

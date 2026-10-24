@@ -247,6 +247,24 @@ export function restoreProgress(snapshot: ProgressState) {
   set(snapshot)
 }
 
+/** Sauvegarde complète de la progression (fichier JSON). */
+export function exportProgress(): string {
+  return JSON.stringify({ app: 'fala', version: 2, exportedAt: new Date().toISOString(), progress: state }, null, 2)
+}
+
+/** Restaure une sauvegarde. Renvoie un message d'erreur si le fichier n'est pas valide. */
+export function importProgress(json: string): string | null {
+  try {
+    const data = JSON.parse(json)
+    const p = data?.app === 'fala' ? data.progress : null
+    if (!p || typeof p !== 'object' || !Array.isArray(p.xpLog) || typeof p.memory !== 'object') return 'Ce fichier n’est pas une sauvegarde Fala!.'
+    set({ ...empty(), ...p, settings: { ...empty().settings, ...p.settings } })
+    return null
+  } catch {
+    return 'Fichier illisible.'
+  }
+}
+
 export function resetProgress() {
   set(empty())
 }

@@ -2587,3 +2587,34 @@ kbd {
   color: var(--text);
   text-align: left;
 }
+
+/* ---------- Web-app (écran d'accueil) ---------- */
+
+/* En plein écran, le contenu ne doit pas passer sous l'encoche / la Dynamic Island. */
+.content {
+  padding-top: calc(16px + env(safe-area-inset-top));
+}
+
+@media (min-width: 900px) {
+  .content {
+    padding-top: calc(32px + env(safe-area-inset-top));
+  }
+}
+
+.update-toast {
+  bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+.update-toast .later {
+  color: var(--bg);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.backup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}

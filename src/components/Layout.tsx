@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { BarChart3, Home, Map, Target } from 'lucide-react'
 import { useEffect } from 'react'
+import { UpdateBanner } from './UpdateBanner'
 
 const NAV = [
   { to: '/', label: 'Accueil', icon: Home, end: true, also: [] as string[] },
@@ -41,6 +42,7 @@ export function Layout() {
       <main className="content">
         <Outlet />
       </main>
+      <UpdateBanner />
       <nav className="tabbar">
         {NAV.map(({ to, label, icon: Icon, end, also }) => (
           <NavLink key={to} to={to} end={end} className={cls('tab', also)}>

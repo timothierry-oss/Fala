@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, Home, Map, Target } from 'lucide-react'
+import { BarChart3, Home, Map, Settings, Target } from 'lucide-react'
 import { useEffect } from 'react'
 import { UpdateBanner } from './UpdateBanner'
 
@@ -8,6 +8,7 @@ const NAV = [
   { to: '/parcours', label: 'Parcours', icon: Map, also: ['/grammaire'] },
   { to: '/pratique', label: 'Entraînement', icon: Target, also: ['/fiches', '/discussions', '/mes-mots', '/ecoute', '/oral', '/argot'] },
   { to: '/progres', label: 'Progrès', icon: BarChart3, also: [] },
+  { to: '/reglages', label: 'Réglages', icon: Settings, also: [] },
 ]
 
 export function Layout() {

@@ -6,6 +6,7 @@
  * il suffit d'implémenter `PronunciationEvaluator` et de remplacer `evaluator` en bas de fichier.
  */
 import { similarity, stripAccents, words } from './text'
+import { getProgress } from './store'
 
 // ---------- Synthèse vocale ----------
 
@@ -40,11 +41,18 @@ if (ttsSupported) {
   window.addEventListener('keydown', unlock, { once: true, capture: true })
 }
 
-/** Voix utilisée (null si aucune voix portugaise n'est installée sur l'appareil). */
-export function currentVoice(): SpeechSynthesisVoice | null {
-  if (!ttsSupported) return null
+/** Voix portugaises disponibles sur l'appareil (meilleures en premier). */
+export function listVoices(): SpeechSynthesisVoice[] {
+  if (!ttsSupported) return []
   if (!voices.length) refreshVoices()
-  return voices[0] ?? null
+  return voices
+}
+
+/** Voix utilisée : celle choisie dans Réglages si elle existe, sinon la meilleure disponible. */
+export function currentVoice(): SpeechSynthesisVoice | null {
+  const list = listVoices()
+  const chosen = getProgress().settings.voiceName
+  return list.find((v) => v.name === chosen) ?? list[0] ?? null
 }
 
 export interface SpeakOptions {
@@ -52,6 +60,8 @@ export interface SpeakOptions {
   /** Permet d'alterner les voix dans un dialogue. */
   voiceIndex?: number
   pitch?: number
+  /** Lecture déclenchée automatiquement (pas par un clic) : ignorée si la lecture auto est désactivée. */
+  auto?: boolean
 }
 
 // Référence gardée : sinon Chrome peut libérer l'énoncé et ne jamais appeler `onend`.
@@ -61,8 +71,10 @@ let current: SpeechSynthesisUtterance | null = null
  * Lit un texte en portugais. Volontairement synchrone jusqu'à `speechSynthesis.speak`
  * (sans `await` avant) : Safari iOS refuse la lecture si elle ne part pas directement du geste.
  */
-export function speak(text: string, { rate = 1, voiceIndex = 0, pitch = 1 }: SpeakOptions = {}): Promise<void> {
-  if (!ttsSupported || !text.trim()) return Promise.resolve()
+export function speak(text: string, { rate = 1, voiceIndex = 0, pitch = 1, auto = false }: SpeakOptions = {}): Promise<void> {
+  const settings = getProgress().settings
+  if (!ttsSupported || !text.trim() || settings.volume <= 0 || (auto && !settings.autoPlay)) return Promise.resolve()
+  rate *= settings.rate
   const synth = window.speechSynthesis
   if (!voices.length) refreshVoices()
   if (synth.speaking || synth.pending) synth.cancel()
@@ -72,10 +84,14 @@ export function speak(text: string, { rate = 1, voiceIndex = 0, pitch = 1 }: Spe
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text)
     u.lang = 'pt-BR'
-    u.rate = rate
+    u.rate = Math.min(2, Math.max(0.3, rate))
     u.pitch = pitch
+    u.volume = settings.volume
     if (voices.length) {
-      u.voice = voices[voiceIndex % voices.length]
+      // Voix choisie en premier ; dans un dialogue, le 2ᵉ personnage prend la voix suivante.
+      const chosen = currentVoice()
+      const ordered = chosen ? [chosen, ...voices.filter((v) => v !== chosen)] : voices
+      u.voice = ordered[voiceIndex % ordered.length]
       // Une seule voix disponible : on varie la hauteur pour distinguer les personnages.
       if (voices.length === 1 && voiceIndex % 2 === 1) u.pitch = 0.75
     }

@@ -8,6 +8,7 @@ import { themes } from '../data/themes'
 import { slang } from '../data/slang'
 import { addDays, dayKey } from './dates'
 import { grade, MASTERED, setStage, type Memory, type Quality } from './memory'
+import { applyTheme } from './theme'
 
 export interface XpEvent {
   date: string
@@ -47,9 +48,25 @@ export interface ChallengeState {
   translation?: number
 }
 
+export type ThemeSetting = 'light' | 'dark' | 'auto'
+
 export interface Settings {
+  /** Lire à voix haute les réactions (« Mandou bem! »). */
   speakReactions: boolean
+  /** Lire automatiquement les mots et phrases quand ils s'affichent. */
+  autoPlay: boolean
+  /** Volume de la voix, 0 à 1 (0 = muet). */
+  volume: number
+  /** Vitesse de lecture (1 = normale). */
+  rate: number
+  /** Nom de la voix choisie (sinon la meilleure voix brésilienne disponible). */
+  voiceName?: string
+  theme: ThemeSetting
+  /** Nombre de questions par série dans les fiches. */
+  roundSize: number
 }
+
+export const DEFAULT_SETTINGS: Settings = { speakReactions: true, autoPlay: true, volume: 1, rate: 1, theme: 'light', roundSize: 20 }
 
 export interface ProgressState {
   name: string
@@ -82,7 +99,7 @@ const empty = (): ProgressState => ({
   grammar: {},
   exercises: {},
   challenges: {},
-  settings: { speakReactions: true },
+  settings: { ...DEFAULT_SETTINGS },
 })
 
 /** Reprend la progression de la première version (boîtes de Leitner). */
@@ -113,9 +130,11 @@ function load(): ProgressState {
 }
 
 let state = load()
+applyTheme(state.settings.theme)
 const listeners = new Set<() => void>()
 
 function set(next: ProgressState) {
+  if (next.settings.theme !== state.settings.theme) applyTheme(next.settings.theme)
   state = next
   try {
     localStorage.setItem(KEY, JSON.stringify(state))
@@ -185,6 +204,7 @@ export function setLastTheme(themeId: string) {
 export function updateSettings(patch: Partial<Pick<ProgressState, 'name' | 'dailyGoal'>> & { settings?: Partial<Settings> }) {
   const { settings, ...rest } = patch
   set({ ...state, ...rest, settings: { ...state.settings, ...settings } })
+  if (settings?.theme) applyTheme(settings.theme)
 }
 
 // --- Mots personnels et mots des discussions ---

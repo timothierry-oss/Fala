@@ -16,7 +16,6 @@ import { ProgressBar, SpeakButton } from './ui'
 
 export type StudyMode = 'apprendre' | 'cartes'
 
-const ROUND = 20
 
 /** État complet juste avant une réponse, pour le bouton « Retour ». */
 interface Step {
@@ -32,7 +31,7 @@ const SLOW_TYPE = 25000
 function makeSession(items: StudyItem[], consolidation: boolean) {
   const order = studyOrder(getProgress(), items, consolidation ? 'all' : 'due')
   return new StudySession(order, {
-    roundSize: ROUND,
+    roundSize: getProgress().settings.roundSize,
     maxActive: 6,
     isDone: (id, good) => {
       const m = getProgress().memory[id]
@@ -226,7 +225,7 @@ export function SmartStudy({
         <button className="undo-btn" onClick={undo} disabled={!canUndo} aria-label="Revenir en arrière" title="Revenir en arrière (⌫)">
           <Undo2 size={18} />
         </button>
-        <ProgressBar value={session.roundStep / ROUND} />
+        <ProgressBar value={session.roundStep / (session.opts.roundSize ?? 20)} />
         {isRetry ? (
           <span className="phase-pill retry-pill" title="Cette réponse ne compte pas dans la progression">
             Nouvel essai · ne compte pas
@@ -303,7 +302,9 @@ function QuestionView({
   const { item } = q
 
   useEffect(() => {
-    if (q.kind === 'intro' || (q.kind === 'mcq' && (q.dir === 'pt-fr' || q.audio))) speak(item.pt)
+    // Question d'écoute : lecture indispensable ; sinon lecture automatique (réglable).
+    if (q.kind === 'mcq' && q.audio) speak(item.pt)
+    else if (q.kind === 'intro' || (q.kind === 'mcq' && q.dir === 'pt-fr')) speak(item.pt, { auto: true })
   }, [q, item])
 
   const answered = (qual: Quality) => {
@@ -378,7 +379,7 @@ function QuestionView({
       setPicked(i)
       const ok = i === q.answer
       answered(ok ? (Date.now() - started.current > SLOW_MCQ ? 'hard' : 'good') : 'again')
-      if (q.dir === 'fr-pt') speak(item.pt)
+      if (q.dir === 'fr-pt') speak(item.pt, { auto: true })
     }
     return (
       <div className="quiz">
@@ -422,7 +423,7 @@ function QuestionView({
     setCheck(c)
     const slow = Date.now() - started.current > SLOW_TYPE
     answered(c === 'wrong' ? 'again' : c === 'exact' && !slow ? 'good' : 'hard')
-    speak(item.pt)
+    speak(item.pt, { auto: true })
   }
   return (
     <form className="write" onSubmit={submit}>
@@ -463,7 +464,7 @@ function QuestionView({
             onClick={() => {
               setCheck('wrong')
               answered('again')
-              speak(item.pt)
+              speak(item.pt, { auto: true })
             }}
           >
             Je ne sais pas

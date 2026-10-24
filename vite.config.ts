@@ -2,8 +2,16 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import pkg from './package.json' with { type: 'json' }
+
 // https://vite.dev/config/
 export default defineConfig({
+  // Infos affichées dans Réglages › Informations.
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __COMMIT__: JSON.stringify((process.env.GITHUB_SHA ?? 'local').slice(0, 7)),
+  },
   plugins: [
     react(),
     // Web-app installable (écran d'accueil, plein écran) et utilisable hors ligne.

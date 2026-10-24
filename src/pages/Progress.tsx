@@ -3,19 +3,16 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ReferenceLine, Responsiv
 import { themes, allVocab } from '../data/themes'
 import type { Skill } from '../data/types'
 import { LevelBadge, PageHeader, ProgressBar } from '../components/ui'
-import { VoiceCheck } from '../components/VoiceCheck'
-import { Backup } from '../components/Backup'
+import { Link } from 'react-router-dom'
+import { ChevronRight, Settings as SettingsIcon } from 'lucide-react'
 import { addDays, dayKey, shortDate } from '../lib/dates'
 import { LEVELS, levelInfo, levelValue } from '../lib/levels'
 import {
   isMastered,
-  loadDemo,
-  resetProgress,
   speakingConfidence,
   streak,
   themeProgress,
   totalXp,
-  updateSettings,
   useProgress,
   xpByDay,
   xpBySkill,
@@ -237,33 +234,16 @@ export function Progress() {
         </ul>
       </section>
 
-      <section className="card settings">
-        <h3>Réglages</h3>
-        <VoiceCheck />
-        <label>
-          <span>Lire les réactions à voix haute 🇧🇷</span>
-          <input type="checkbox" checked={p.settings.speakReactions} onChange={(e) => updateSettings({ settings: { speakReactions: e.target.checked } })} />
-        </label>
-        <label>
-          <span>Objectif quotidien</span>
-          <select value={p.dailyGoal} onChange={(e) => updateSettings({ dailyGoal: Number(e.target.value) })}>
-            {[20, 50, 100, 150].map((g) => (
-              <option key={g} value={g}>
-                {g} XP / jour
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="row gap-sm wrap">
-          <button className="btn btn-ghost" onClick={() => confirm('Remplacer ta progression par des données de démonstration ?') && loadDemo()}>
-            Charger des données de démo
-          </button>
-          <button className="btn btn-danger" onClick={() => confirm('Effacer toute ta progression ?') && resetProgress()}>
-            Réinitialiser
-          </button>
+      <Link to="/reglages" className="card step">
+        <span className="step-icon">
+          <SettingsIcon size={20} />
+        </span>
+        <div className="grow">
+          <h3>Réglages</h3>
+          <p className="muted small">Son, thème, objectif quotidien, sauvegarde de ta progression…</p>
         </div>
-        <Backup />
-      </section>
+        <ChevronRight size={20} className="muted" />
+      </Link>
     </div>
   )
 }
@@ -272,7 +252,7 @@ function EmptyChart() {
   return (
     <div className="empty-chart">
       <p>📈 Ta courbe apparaîtra dès ta première leçon.</p>
-      <p className="muted small">Astuce : charge les données de démo en bas de page pour voir à quoi elle ressemble.</p>
+      <p className="muted small">Astuce : charge les données de démo dans Réglages pour voir à quoi elle ressemble.</p>
     </div>
   )
 }

@@ -235,7 +235,7 @@ function Translations({ c }: { c: Challenge }) {
     const ok = r.verdict === 'exact' || r.verdict === 'accents'
     setResult({ ...r, ok })
     setReaction(react(ok))
-    speak(r.best)
+    speak(r.best, { auto: true })
   }
 
   const next = (forceOk?: boolean) => {

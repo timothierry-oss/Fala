@@ -65,7 +65,7 @@ export function ExerciseView({
     onAnswered?.()
     setResult(ok)
     setReaction(react(ok))
-    speak(fullSentence(e))
+    speak(fullSentence(e), { auto: true })
   }
 
   const submit = (ev: React.FormEvent) => {

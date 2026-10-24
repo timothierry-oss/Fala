@@ -116,7 +116,7 @@ function Reader({ d }: { d: Discussion }) {
         : { term: tok.text, fr: '', known: false }
     }
     setSelected(sel)
-    speak(sel.term)
+    speak(sel.term, { auto: true })
   }
 
   const cleanTerm = (t: string) => t.replace(/[?!.]$/, '')

@@ -245,4 +245,9 @@ export class StudySession {
     this.roundStep = 0
     this.roundCorrect = 0
   }
+
+  /** Ajoute de nouveaux candidats à la file, sans perdre l'état de planification en cours. */
+  extend(ids: string[]) {
+    this.queue.push(...ids)
+  }
 }

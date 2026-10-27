@@ -13,6 +13,7 @@ import { MyWords } from './pages/MyWords'
 import { DiscussionList, DiscussionReader } from './pages/Discussions'
 import { GrammarPath, GrammarReview, NotionPage, TensePage } from './pages/Grammar'
 import { ChallengePage } from './pages/Challenges'
+import { RoutinePage } from './pages/Routine'
 import { Settings } from './pages/Settings'
 
 // Recharts est lourd : la page Progrès est chargée à la demande.
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="grammaire/:notionId" element={<NotionPage />} />
           <Route path="grammaire/temps/:tenseId" element={<TensePage />} />
           <Route path="grammaire/plus-loin/:challengeId" element={<ChallengePage />} />
+          <Route path="routine" element={<RoutinePage />} />
           <Route path="progres" element={<Suspense fallback={null}><Progress /></Suspense>} />
           <Route path="reglages" element={<Settings />} />
           <Route path="*" element={<NotFound />} />

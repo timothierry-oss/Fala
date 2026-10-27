@@ -25,8 +25,8 @@ interface Step {
   session: SessionSnapshot
   verdicts: Record<string, 'good' | 'again'>
 }
-const SLOW_MCQ = 12000
-const SLOW_TYPE = 25000
+export const SLOW_MCQ = 12000
+export const SLOW_TYPE = 25000
 
 function makeSession(items: StudyItem[], consolidation: boolean) {
   const order = studyOrder(getProgress(), items, consolidation ? 'all' : 'due')
@@ -282,7 +282,7 @@ function HighlightedSentence({ h }: { h: Highlight }) {
   )
 }
 
-function QuestionView({
+export function QuestionView({
   q,
   onIntro,
   onDone,

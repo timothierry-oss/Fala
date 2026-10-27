@@ -65,14 +65,22 @@ export function Speaking() {
     setResult(null)
     setInterim('')
     setMic('listening')
-    const s = listen(setInterim)
-    session.current = s
+    let timer: ReturnType<typeof setTimeout> | undefined
     try {
-      const transcripts = await s.result
+      const s = listen(setInterim)
+      session.current = s
+      // Filet de sécurité : certains navigateurs n'envoient jamais `onend`/`onerror`
+      // (micro refusé en silence, onglet mis en arrière-plan…), ce qui bloquait le bouton indéfiniment.
+      const timeout = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          s.stop()
+          reject(new Error('timeout'))
+        }, 15000)
+      })
+      const transcripts = await Promise.race([s.result, timeout])
       setMic('evaluating')
       if (!transcripts.length) {
         setError('Je n’ai rien entendu. Rapproche-toi du micro et réessaie.')
-        setMic('idle')
         return
       }
       const r = await evaluator.evaluate(phrase.pt, { transcripts })
@@ -80,9 +88,18 @@ export function Speaking() {
       recordSpeaking(phrase.id, r.score)
     } catch (e) {
       const msg = (e as Error).message
-      setError(msg === 'not-allowed' ? 'Accès au micro refusé. Autorise le micro dans les réglages du navigateur.' : `Erreur de reconnaissance (${msg}).`)
+      setError(
+        msg === 'not-allowed'
+          ? 'Accès au micro refusé. Autorise le micro dans les réglages du navigateur.'
+          : msg === 'timeout'
+            ? 'Rien reçu du micro. Réessaie.'
+            : `Erreur de reconnaissance (${msg}).`,
+      )
+    } finally {
+      clearTimeout(timer)
+      session.current = null
+      setMic('idle')
     }
-    setMic('idle')
   }
 
   const next = () => {

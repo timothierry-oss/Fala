@@ -90,44 +90,78 @@ function DialoguePlayer({ theme, compact }: { theme: Theme; compact?: boolean })
   const [slow, setSlow] = useState(false)
   const [showText, setShowText] = useState(false)
   const [showFr, setShowFr] = useState(false)
-  const cancel = useRef(false)
+  // Identifie la lecture en cours : incrémenté à chaque pause/seek pour invalider la boucle précédente.
+  const runId = useRef(0)
   const speakers = useMemo(() => [...new Set(theme.dialogue.lines.map((l) => l.speaker))], [theme])
   const rate = slow ? 0.7 : 0.95
+  const lines = theme.dialogue.lines
 
-  const play = async () => {
-    if (playing) {
-      cancel.current = true
-      stopSpeaking()
-      setPlaying(false)
-      setCurrent(-1)
-      return
-    }
-    cancel.current = false
+  const runFrom = async (start: number) => {
+    const id = ++runId.current
     setPlaying(true)
-    for (let i = 0; i < theme.dialogue.lines.length; i++) {
-      if (cancel.current) break
-      const line = theme.dialogue.lines[i]
+    for (let i = start; i < lines.length; i++) {
+      if (runId.current !== id) return
+      const line = lines[i]
       setCurrent(i)
       await speak(line.pt, { rate, voiceIndex: speakers.indexOf(line.speaker) })
+      if (runId.current !== id) return
       await new Promise((r) => setTimeout(r, 350))
     }
+    if (runId.current === id) {
+      setPlaying(false)
+      setCurrent(-1)
+    }
+  }
+
+  const pause = () => {
+    runId.current++
+    stopSpeaking()
     setPlaying(false)
-    setCurrent(-1)
+  }
+
+  const togglePlay = () => {
+    if (playing) pause()
+    else runFrom(current < 0 ? 0 : current)
+  }
+
+  const seekTo = (i: number) => {
+    const wasPlaying = playing
+    runId.current++
+    stopSpeaking()
+    const idx = Math.min(lines.length - 1, Math.max(0, i))
+    setCurrent(idx)
+    if (wasPlaying) runFrom(idx)
+    else setPlaying(false)
   }
 
   useEffect(() => () => {
-    cancel.current = true
+    runId.current++
+    stopSpeaking()
   }, [])
 
   return (
     <div className={`card player ${compact ? 'compact' : ''}`}>
       <div className="player-main">
-        <button className="play-btn" onClick={play} aria-label={playing ? 'Pause' : 'Écouter le dialogue'}>
+        <button className="play-btn" onClick={togglePlay} aria-label={playing ? 'Pause' : 'Écouter le dialogue'}>
           {playing ? <Pause size={28} /> : <Play size={28} />}
         </button>
         <div className="grow">
           <Waveform active={playing} bars={compact ? 14 : 24} />
-          <ProgressBar value={playing ? (current + 1) / theme.dialogue.lines.length : 0} />
+          <div
+            className="player-seek"
+            role="slider"
+            aria-label="Position dans le dialogue"
+            aria-valuemin={0}
+            aria-valuemax={lines.length - 1}
+            aria-valuenow={Math.max(current, 0)}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const ratio = (e.clientX - rect.left) / rect.width
+              seekTo(Math.floor(ratio * lines.length))
+            }}
+          >
+            <ProgressBar value={current >= 0 ? (current + 1) / lines.length : 0} />
+          </div>
         </div>
       </div>
       <div className="row gap-sm wrap">

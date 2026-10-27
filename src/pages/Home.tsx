@@ -6,6 +6,7 @@ import { HeroArt } from '../components/HeroArt'
 import { LevelBadge, ProgressBar, Ring, SpeakButton, Waveform } from '../components/ui'
 import { addDays, dayKey, startOfWeek } from '../lib/dates'
 import { levelInfo } from '../lib/levels'
+import { curriculumProgress } from '../lib/routine'
 import {
   isMastered,
   speakingConfidence,
@@ -46,6 +47,7 @@ export function Home() {
   const s = streak(p)
   const confidence = speakingConfidence(p)
   const daily = wordsOfTheDay()
+  const { overallPct } = curriculumProgress(p)
 
   return (
     <div className="page home">
@@ -65,6 +67,24 @@ export function Home() {
       </section>
 
       <div className="home-grid">
+        <Link to="/routine" className="continue-card compact">
+          <div className="continue-top">
+            <div>
+              <p className="eyebrow light">Parcours vers le B1 · {Math.round(overallPct * 100)} %</p>
+              <h2>🎯 Faire une routine</h2>
+              <p className="light-text">
+                {p.routinesCompleted
+                  ? `${p.routinesCompleted} routine${p.routinesCompleted > 1 ? 's' : ''} déjà faites · adaptée à tes points faibles`
+                  : 'Vocabulaire, grammaire et traduction, dans l’ordre, adaptés à tes points faibles.'}
+              </p>
+            </div>
+            <span className="round-btn">
+              <ChevronRight size={22} />
+            </span>
+          </div>
+          <ProgressBar value={overallPct} tone="light" />
+        </Link>
+
         <Link to={`/parcours/${current.id}`} className="continue-card">
           <div className="continue-top">
             <div>

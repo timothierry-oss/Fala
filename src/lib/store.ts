@@ -77,6 +77,10 @@ export interface ProgressState {
   /** Meilleur score de prononciation par phrase. */
   speaking: Record<string, number>
   lastTheme?: string
+  /** dayKey() de la dernière routine terminée (affichage uniquement, aucune limite quotidienne). */
+  lastRoutineDay?: string
+  /** Nombre total de routines terminées, toutes journées confondues. */
+  routinesCompleted: number
   custom: CustomWord[]
   grammar: Record<string, GrammarState>
   exercises: Record<string, ExerciseStat>
@@ -100,6 +104,7 @@ const empty = (): ProgressState => ({
   exercises: {},
   challenges: {},
   settings: { ...DEFAULT_SETTINGS },
+  routinesCompleted: 0,
 })
 
 /** Reprend la progression de la première version (boîtes de Leitner). */
@@ -189,6 +194,16 @@ export function completeStep(themeId: string, step: StepId, score: number) {
   const best = Math.max(score, prev?.score ?? 0)
   set({ ...state, lastTheme: themeId, steps: { ...state.steps, [key]: { score: best, date: dayKey() } } })
   if (!prev) addXp(step === 'oral' ? 'oral' : step === 'ecoute' ? 'ecoute' : 'vocabulaire', 20)
+}
+
+/** Réussir le quiz final valide tout le thème (les étapes pas encore faites sont marquées terminées). */
+export function completeTheme(themeId: string, score: number) {
+  ;(['vocabulaire', 'ecoute', 'oral', 'quiz'] as StepId[]).forEach((step) => completeStep(themeId, step, score))
+}
+
+/** Une série de routine est terminée : pas de verrou quotidien, on peut en enchaîner plusieurs. */
+export function markRoutineDone() {
+  set({ ...state, lastRoutineDay: dayKey(), routinesCompleted: state.routinesCompleted + 1 })
 }
 
 export function recordSpeaking(phraseId: string, score: number) {

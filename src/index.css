@@ -1382,6 +1382,11 @@ a.card:hover {
   gap: 6px;
 }
 
+.player-seek {
+  cursor: pointer;
+  padding: 6px 0;
+}
+
 .play-btn {
   display: grid;
   place-items: center;

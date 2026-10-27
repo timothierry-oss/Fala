@@ -280,7 +280,7 @@ export function NotionPage() {
   )
 }
 
-function LearnPhase({ notion, onClose }: { notion: Notion; onClose: () => void }) {
+export function LearnPhase({ notion, onClose }: { notion: Notion; onClose: () => void }) {
   const [step, setStep] = useState<'lesson' | number>('lesson')
   const [score, setScore] = useState(0)
   const guided = useMemo(() => sample(notion.exercises, 3), [notion])

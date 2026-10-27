@@ -8,7 +8,7 @@ import { QuizRunner, ResultScreen } from '../components/QuizRunner'
 import { buildVocabQuiz } from '../lib/quiz'
 import { NavLink } from 'react-router-dom'
 import { allVocab } from '../data/themes'
-import { completeStep, recordReview, stepDone, themeProgress, useProgress } from '../lib/store'
+import { completeTheme, recordReview, stepDone, themeProgress, useProgress } from '../lib/store'
 import { NotFound } from './NotFound'
 
 export const STEPS: { id: StepId; label: string; desc: string; icon: typeof BookOpen; href: (id: string) => string }[] = [
@@ -94,7 +94,7 @@ export function ThemeDetail() {
           const score = p.steps[`${theme.id}:${s.id}`]?.score
           return (
             <li key={s.id}>
-              <Link to={s.href(theme.id)} className={`card step ${done ? 'done' : ''}`}>
+              <Link to={s.href(theme.id)} state={{ from: '/parcours' }} className={`card step ${done ? 'done' : ''}`}>
                 <span className="step-icon">{done ? <Check size={20} /> : <s.icon size={20} />}</span>
                 <div className="grow">
                   <p className="eyebrow">Étape {i + 1}</p>
@@ -154,7 +154,7 @@ export function ThemeQuiz() {
           questions={questions}
           onAnswer={(q, ok) => q.cardId && recordReview(q.cardId, ok ? 'good' : 'again', 'vocabulaire', 3)}
           onFinish={(c, t) => {
-            completeStep(theme.id, 'quiz', Math.round((c / t) * 100))
+            completeTheme(theme.id, Math.round((c / t) * 100))
             setResult({ c, t })
           }}
         />

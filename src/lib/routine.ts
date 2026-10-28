@@ -8,12 +8,13 @@
  */
 import type { Level, StudyItem } from '../data/types'
 import { themeById, themes } from '../data/themes'
+import { collections } from '../data/collections'
 import { notionById, notions, type Exercise, type Notion } from '../data/grammar'
 import { challengeById, challenges, parseCloze, type Blank, type Challenge } from '../data/challenges'
 import { isDue, needsConsolidation, MASTERED, type Memory } from './memory'
 import { studyOrder } from './decks'
-import { LEVELS } from './levels'
-import { completeStep, stepDone, type ProgressState } from './store'
+import { LEVELS, levelInfo } from './levels'
+import { completeStep, cooldownFactor, stepDone, totalXp, type ProgressState } from './store'
 
 export type RoutineItem =
   | { id: string; kind: 'vocab'; item: StudyItem; topicId: string }
@@ -21,6 +22,7 @@ export type RoutineItem =
   | { id: string; kind: 'learn-notion'; notion: Notion }
   | { id: string; kind: 'cloze'; challengeId: string; blankIndex: number; topicId: string }
   | { id: string; kind: 'translation'; challengeId: string; index: number; topicId: string }
+  | { id: string; kind: 'theme-quiz'; themeId: string; questionIndex: number; topicId: string }
 
 interface Weighted {
   id: string
@@ -74,6 +76,12 @@ function weightedSample<T extends Weighted>(pool: T[], n: number): T[] {
   return out
 }
 
+/** Pénalise (sans jamais exclure) un sujet servi dans une session récente, pour faire tourner le contenu. */
+const withCooldown = (p: ProgressState, prefix: string) => (w: Weighted): Weighted => ({
+  ...w,
+  weight: w.weight * (1 - 0.8 * cooldownFactor(p, `${prefix}:${w.id}`)),
+})
+
 /** Thèmes déjà entamés (au moins un mot vu), pondérés par leur faiblesse moyenne. */
 function themeWeights(p: ProgressState): Weighted[] {
   return themes
@@ -84,6 +92,20 @@ function themeWeights(p: ProgressState): Weighted[] {
       return { id: t.id, weight: Math.max(0.03, weight) }
     })
     .filter((x): x is Weighted => x !== null)
+    .map(withCooldown(p, 'theme'))
+}
+
+/** Collections déjà entamées (verbes, adverbes, expressions…), pondérées comme les thèmes. */
+function collectionWeights(p: ProgressState): Weighted[] {
+  return collections
+    .map((c) => {
+      const seen = c.items.filter((v) => p.memory[v.id])
+      if (!seen.length) return null
+      const weight = seen.reduce((a, v) => a + perWordWeak(p.memory[v.id]), 0) / seen.length
+      return { id: c.id, weight: Math.max(0.03, weight) }
+    })
+    .filter((x): x is Weighted => x !== null)
+    .map(withCooldown(p, 'collection'))
 }
 
 /** Notions déjà apprises, pondérées par leur taux d'exercices ratés et leur meilleur score. */
@@ -97,18 +119,35 @@ function notionWeights(p: ProgressState): Weighted[] {
       const weight = 0.7 * (ids.length ? weakCount / ids.length : 0) + 0.3 * (1 - best / 100)
       return { id: n.id, weight: Math.max(0.02, weight) }
     })
+    .map(withCooldown(p, 'notion'))
 }
 
-/** Défis au niveau déjà atteint, pondérés par leur score (jamais tenté → légère inclusion). */
-function challengeWeights(p: ProgressState, maxLevel: Level): Weighted[] {
+/** Défis au niveau déjà atteint (frontière du parcours ET niveau CEFR réel), pondérés par leur score. */
+function challengeWeights(p: ProgressState, maxLevel: Level, userLevel: Level): Weighted[] {
+  const cap = Math.min(levelIndex(maxLevel), levelIndex(userLevel))
   return challenges
-    .filter((c) => levelIndex(c.level) <= levelIndex(maxLevel))
+    .filter((c) => levelIndex(c.level) <= cap)
     .map((c) => {
       const s = p.challenges[c.id]
       const tried = s && (s.cloze !== undefined || s.translation !== undefined)
       const weight = tried ? 1 - ((s!.cloze ?? 50) + (s!.translation ?? 50)) / 200 : 0.25
       return { id: c.id, weight: Math.max(0.05, weight) }
     })
+    .map(withCooldown(p, 'challenge'))
+}
+
+/** Questions de compréhension d'un thème déjà entamé, pondérées par leur taux d'échec (via `p.exercises`). */
+function themeQuizWeights(p: ProgressState): Weighted[] {
+  return themes
+    .filter((t) => stepDone(p, t.id, 'vocabulaire'))
+    .map((t) => {
+      const ids = t.questions.map((_, i) => `theme-quiz:${t.id}:${i}`)
+      const weakCount = ids.filter((id) => p.exercises[id]?.weak).length
+      const weight = ids.length ? Math.max(0.1, weakCount / ids.length || 0.2) : 0
+      return { id: t.id, weight }
+    })
+    .filter((w) => w.weight > 0)
+    .map(withCooldown(p, 'theme-quiz'))
 }
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i)
@@ -162,6 +201,7 @@ export function buildRoutine(p: ProgressState): RoutineItem[] {
   const frontierT = frontierTheme(p)
   const frontierN = frontierNotion(p)
   const maxLevel: Level = frontierT?.level ?? frontierN?.level ?? 'A1'
+  const userLevel: Level = levelInfo(totalXp(p)).level
 
   // 1) Vocabulaire neuf : uniquement le thème frontière, dans l'ordre.
   let unseenLeft = 0
@@ -178,17 +218,31 @@ export function buildRoutine(p: ProgressState): RoutineItem[] {
     }
   }
 
-  // 2) Révision de vocabulaire : thèmes déjà entamés, pondérés par faiblesse.
-  for (const tw of weightedSample(themeWeights(p), 2)) {
+  // 2) Révision de vocabulaire : thèmes et collections déjà entamés, pondérés par faiblesse (pas l'argot).
+  for (const tw of weightedSample(themeWeights(p), 3)) {
     const theme = themeById(tw.id)
     if (!theme) continue
     const candidates = theme.vocab.filter((v) => !usedVocab.has(v.id) && (p.memory[v.id]?.stage ?? 0) > 0)
     const order = studyOrder(p, candidates, 'due')
     for (const id of order) {
-      if (items.filter((i) => i.kind === 'vocab').length >= 10) break
+      if (items.filter((i) => i.kind === 'vocab').length >= 8) break
       const item = candidates.find((v) => v.id === id)
       if (item) {
         items.push({ id: `vocab:${id}`, kind: 'vocab', item, topicId: theme.id })
+        usedVocab.add(id)
+      }
+    }
+  }
+  for (const cw of weightedSample(collectionWeights(p), 2)) {
+    const col = collections.find((c) => c.id === cw.id)
+    if (!col) continue
+    const candidates = col.items.filter((v) => !usedVocab.has(v.id) && (p.memory[v.id]?.stage ?? 0) > 0)
+    const order = studyOrder(p, candidates, 'due')
+    for (const id of order) {
+      if (items.filter((i) => i.kind === 'vocab').length >= 11) break
+      const item = candidates.find((v) => v.id === id)
+      if (item) {
+        items.push({ id: `vocab:${id}`, kind: 'vocab', item, topicId: col.id })
         usedVocab.add(id)
       }
     }
@@ -200,26 +254,34 @@ export function buildRoutine(p: ProgressState): RoutineItem[] {
   }
 
   // 4) Grammaire : drill des notions déjà apprises, pondéré par les points faibles.
-  for (const nw of weightedSample(notionWeights(p), 2)) {
+  for (const nw of weightedSample(notionWeights(p), 4)) {
     const notion = notionById(nw.id)
     if (!notion) continue
     const weak = notion.exercises.filter((e) => p.exercises[e.id]?.weak)
     const pool = weak.length ? weak : notion.exercises
     const grammarCount = items.filter((i) => i.kind === 'grammar').length
     for (const ex of pool) {
-      if (items.filter((i) => i.kind === 'grammar').length - grammarCount >= 4) break
+      if (items.filter((i) => i.kind === 'grammar').length - grammarCount >= 3) break
       items.push({ id: `grammar:${ex.id}`, kind: 'grammar', ex, topicId: notion.id })
     }
   }
 
-  // 5) Traduction + texte à trous : défis au niveau déjà atteint.
-  for (const cw of weightedSample(challengeWeights(p, maxLevel), 2)) {
+  // 5) Traduction + texte à trous : défis au niveau déjà atteint (frontière ET niveau XP réel).
+  for (const cw of weightedSample(challengeWeights(p, maxLevel, userLevel), 3)) {
     const c = challengeById(cw.id)
     if (!c) continue
     const tIdx = pickWeightedIndex(p, c.translations.length, (i) => `translation:${c.id}:${i}`)
     if (tIdx !== undefined) items.push({ id: `translation:${c.id}:${tIdx}`, kind: 'translation', challengeId: c.id, index: tIdx, topicId: c.id })
     const bIdx = pickWeightedIndex(p, clozeBlankCount(c), (i) => `cloze:${c.id}:${i}`)
     if (bIdx !== undefined) items.push({ id: `cloze:${c.id}:${bIdx}`, kind: 'cloze', challengeId: c.id, blankIndex: bIdx, topicId: c.id })
+  }
+
+  // 5b) Quiz de thème : questions de compréhension des thèmes déjà entamés.
+  for (const qw of weightedSample(themeQuizWeights(p), 2)) {
+    const theme = themeById(qw.id)
+    if (!theme || !theme.questions.length) continue
+    const qIdx = pickWeightedIndex(p, theme.questions.length, (i) => `theme-quiz:${theme.id}:${i}`)
+    if (qIdx !== undefined) items.push({ id: `theme-quiz:${theme.id}:${qIdx}`, kind: 'theme-quiz', themeId: theme.id, questionIndex: qIdx, topicId: theme.id })
   }
 
   // 6) Repli : peu d'historique (grammaire/défis vides) → on comble avec du vocabulaire du thème frontière.
@@ -232,6 +294,25 @@ export function buildRoutine(p: ProgressState): RoutineItem[] {
   }
 
   return interleave(items)
+}
+
+/** Clé de cooldown du sujet derrière un item (voir `withCooldown`) ; `undefined` si l'item n'en a pas (leçon). */
+export function topicKeyOf(item: RoutineItem): string | undefined {
+  switch (item.kind) {
+    case 'vocab':
+      if (themeById(item.topicId)) return `theme:${item.topicId}`
+      if (collections.some((c) => c.id === item.topicId)) return `collection:${item.topicId}`
+      return undefined
+    case 'grammar':
+      return `notion:${item.topicId}`
+    case 'cloze':
+    case 'translation':
+      return `challenge:${item.topicId}`
+    case 'theme-quiz':
+      return `theme-quiz:${item.topicId}`
+    case 'learn-notion':
+      return undefined
+  }
 }
 
 export function curriculumProgress(p: ProgressState) {

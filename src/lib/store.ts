@@ -68,6 +68,12 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = { speakReactions: true, autoPlay: true, volume: 1, rate: 1, theme: 'light', roundSize: 20 }
 
+/** Un sujet (thème, notion, défi…) servi dans une routine, pour éviter de le retirer à la session suivante. */
+export interface ServedEntry {
+  topicKey: string
+  at: number
+}
+
 export interface ProgressState {
   name: string
   dailyGoal: number
@@ -85,6 +91,8 @@ export interface ProgressState {
   grammar: Record<string, GrammarState>
   exercises: Record<string, ExerciseStat>
   challenges: Record<string, ChallengeState>
+  /** Sujets (thème:id, notion:id, défi:id…) servis récemment par la routine, pour faire tourner le contenu d'une session à l'autre. */
+  recentServed: ServedEntry[]
   settings: Settings
 }
 
@@ -103,6 +111,7 @@ const empty = (): ProgressState => ({
   grammar: {},
   exercises: {},
   challenges: {},
+  recentServed: [],
   settings: { ...DEFAULT_SETTINGS },
   routinesCompleted: 0,
 })
@@ -204,6 +213,34 @@ export function completeTheme(themeId: string, score: number) {
 /** Une série de routine est terminée : pas de verrou quotidien, on peut en enchaîner plusieurs. */
 export function markRoutineDone() {
   set({ ...state, lastRoutineDay: dayKey(), routinesCompleted: state.routinesCompleted + 1 })
+}
+
+/** Fenêtre glissante conservée pour `recentServed` (au-delà, un sujet n'est plus pénalisé). */
+const SERVED_WINDOW_MS = 30 * 24 * 60 * 60 * 1000
+const SERVED_MAX = 500
+
+function pruneServed(list: ServedEntry[], now = Date.now()): ServedEntry[] {
+  const kept = list.filter((e) => now - e.at < SERVED_WINDOW_MS)
+  return kept.length > SERVED_MAX ? kept.slice(kept.length - SERVED_MAX) : kept
+}
+
+/** Journalise les sujets (thème:id, notion:id, défi:id, theme-quiz:id…) servis dans une routine. */
+export function recordServed(topicKeys: string[]) {
+  if (!topicKeys.length) return
+  const now = Date.now()
+  const entries = topicKeys.map((topicKey) => ({ topicKey, at: now }))
+  set({ ...state, recentServed: pruneServed([...state.recentServed, ...entries], now) })
+}
+
+/** 0 = jamais vu récemment, proche de 1 = vu très récemment (pénalise sans jamais exclure). */
+export function cooldownFactor(p: ProgressState, topicKey: string, now = Date.now()): number {
+  let factor = 0
+  for (const e of p.recentServed) {
+    if (e.topicKey !== topicKey) continue
+    const hoursSince = (now - e.at) / (60 * 60 * 1000)
+    factor = Math.max(factor, Math.max(0, 1 - hoursSince / 24))
+  }
+  return factor
 }
 
 export function recordSpeaking(phraseId: string, score: number) {

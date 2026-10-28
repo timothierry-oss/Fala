@@ -77,7 +77,15 @@ Você ___ café ou chá? (beber)|bebe|bebo,bebem,bebemos|Tu bois du café ou du 
 Eu ___ a janela. (abrir)|abro|abre,abrimos,abrem|J'ouvre la fenêtre.
 Meu irmão ___ e-mails o dia todo. (escrever)|escreve|escrevo,escrevem,escrevemos|Mon frère écrit des e-mails toute la journée.
 Nós ___ para o Rio amanhã. (partir)|partimos|partem,parte,parto|Nous partons pour Rio demain.
-Eu ___ de música brasileira. (gostar)|gosto|gosta,gostamos,gostam|J'aime la musique brésilienne.`,
+Eu ___ de música brasileira. (gostar)|gosto|gosta,gostamos,gostam|J'aime la musique brésilienne.
+Ele ___ cedo todos os dias. (acordar)|acorda|acordo,acordamos,acordam|Il se réveille tôt tous les jours.
+Você ___ muito bem português! (falar)|fala|falo,falamos,falam|Tu parles très bien portugais !
+Nós ___ pizza no sábado. (comer)|comemos|come,comem,como|Nous mangeons de la pizza le samedi.
+Eu ___ perto da praia. (morar)|moro|mora,moramos,moram|J'habite près de la plage.
+Elas ___ no mesmo apartamento. (morar)|moram|mora,moro,moramos|Elles habitent dans le même appartement.
+A gente ___ cedo no verão. (acordar)|acorda|acordamos,acordam,acordo|On se réveille tôt en été.
+Vocês ___ a porta quando saem? (fechar)|fecham|fecha,fechamos,fecho|Vous fermez la porte quand vous partez ?
+Ele ___ café todas as manhãs. (tomar)|toma|tomo,tomamos,tomam|Il boit du café tous les matins.`,
   }),
   n({
     id: 'ser-estar',
@@ -107,7 +115,13 @@ ___ três horas da tarde.|São|Estão,É,Está|Il est trois heures de l'après-m
 Minha mãe ___ muito simpática.|é|está,são,sou|Ma mère est très sympathique.
 Você ___ bem? Parece triste.|está|é,estão,são|Tu vas bien ? Tu as l'air triste.
 A festa ___ no sábado.|é|está,são,estão|La fête est samedi.
-As crianças ___ na escola.|estão|são,está,é|Les enfants sont à l'école.`,
+As crianças ___ na escola.|estão|são,está,é|Les enfants sont à l'école.
+Nós ___ muito cansados hoje. (estar)|estamos|somos,são,estão|Nous sommes très fatigués aujourd'hui.
+Eles ___ sempre muito gentis. (ser)|são|estão,é,está|Ils sont toujours très gentils.
+Vocês ___ prontos para sair? (estar)|estão|são,é,está|Vous êtes prêts à sortir ?
+Eu ___ estudante de português. (ser)|sou|estou,é,está|Je suis étudiant de portugais.
+A sopa ___ quente ainda. (estar)|está|é,são,estão|La soupe est encore chaude.
+Nós ___ brasileiros. (ser)|somos|somo,são,estamos|Nous sommes brésiliens.`,
   }),
   n({
     id: 'presente-irregulares',
@@ -149,7 +163,11 @@ Ela ___ um livro por semana. (ler)|lê|leia,lei,leem|Elle lit un livre par semai
 Eu ___ muita saudade da minha família. (sentir)|sinto|sente,sento,sentimos|Ma famille me manque beaucoup.
 Ele ___ a escada correndo. (subir)|sobe|sube,subo,sobem|Il monte l'escalier en courant.
 Eu não ___ abrir essa porta. (conseguir)|consigo|consegue,conseguo,conseguimos|Je n'arrive pas à ouvrir cette porte.
-Quanto ___ esse carro? (valer)|vale|valho,valem,valhe|Combien vaut cette voiture ?`,
+Quanto ___ esse carro? (valer)|vale|valho,valem,valhe|Combien vaut cette voiture ?
+Nós ___ sair agora. (poder)|podemos|pode,posso,podem|Nous pouvons sortir maintenant.
+Vocês ___ o que fazer? (saber)|sabem|sabe,sei,sabemos|Vous savez quoi faire ?
+Nós ___ ver o show juntos. (querer)|queremos|quer,quero,querem|Nous voulons voir le spectacle ensemble.
+Vocês ___ cedo amanhã? (vir)|vêm|vem,venho,vimos|Vous venez tôt demain ?`,
   }),
   n({
     id: 'futuro-proximo',
@@ -175,7 +193,10 @@ Eu vou ___ português no Brasil. (estudar)|estudar|estudo,estuda,estudando|Je va
 A gente ___ ver um filme.|vai|vamos,vão,vou|On va regarder un film.
 Você vai ___ o quê? (fazer)|fazer|faz,faço,feito|Tu vas faire quoi ?
 Vocês ___ gostar da festa!|vão|vai,vamos,vou|Vous allez adorer la fête !
-Eu não ___ trabalhar amanhã.|vou|vai,vamos,vão|Je ne vais pas travailler demain.`,
+Eu não ___ trabalhar amanhã.|vou|vai,vamos,vão|Je ne vais pas travailler demain.
+Nós ___ visitar meus pais no fim de semana.|vamos|vai,vão,vou|Nous allons visiter mes parents ce week-end.
+Vocês vão ___ no aniversário? (dançar)|dançar|dança,dançam,dançando|Vous allez danser à l'anniversaire ?
+Eles ___ chegar daqui a uma hora.|vão|vai,vamos,vou|Ils vont arriver dans une heure.`,
   }),
   n({
     id: 'gerundio',
@@ -228,7 +249,13 @@ Eu ___ um e-mail para o chefe. (escrever)|escrevi|escreveu,escrevo,escreveram|J'
 A gente ___ muito na festa! (dançar)|dançou|dançaram,dancei,dança|On a beaucoup dansé à la fête !
 Vocês ___ o metrô? (pegar)|pegaram|pegou,peguei,pegam|Vous avez pris le métro ?
 Eu ___ a janela porque estava calor. (abrir)|abri|abriu,abro,abriram|J'ai ouvert la fenêtre parce qu'il faisait chaud.
-Eu ___ atrasado. (chegar)|cheguei|chegei,chegou,chego|Je suis arrivé en retard.`,
+Eu ___ atrasado. (chegar)|cheguei|chegei,chegou,chego|Je suis arrivé en retard.
+Nós ___ muito ontem na festa. (dançar)|dançamos|dançaram,dancei,dança|Nous avons beaucoup dansé hier à la fête.
+Vocês ___ o relatório a tempo? (terminar)|terminaram|terminou,terminei,terminamos|Vous avez fini le rapport à temps ?
+Eles ___ cedo demais. (chegar)|chegaram|chegou,cheguei,chegamos|Ils sont arrivés trop tôt.
+Ela ___ uma carta para o avô. (escrever)|escreveu|escrevi,escreveram,escreve|Elle a écrit une lettre à son grand-père.
+Nós ___ o filme duas vezes. (assistir)|assistimos|assistiram,assisti,assiste|Nous avons regardé le film deux fois.
+Eu ___ o aniversário dela. (esquecer)|esqueci|esqueceu,esquecemos,esqueceram|J'ai oublié son anniversaire.`,
   }),
   n({
     id: 'preterito-irregulares',
@@ -263,7 +290,11 @@ ___ um acidente na estrada. (haver)|Houve|Haveu,Houveram,Hove|Il y a eu un accid
 Nós ___ todas as instruções. (ler)|lemos|leemos,lêmos,leram|Nous avons lu toutes les instructions.
 Eles ___ a música e começaram a dançar. (ouvir)|ouviram|ouveram,ouçaram,ouviu|Ils ont entendu la musique et ont commencé à danser.
 Eu ___ um café e fui embora. (pedir)|pedi|peci,pedei,pediu|J'ai commandé un café et je suis parti.
-Vocês ___ fazer tudo a tempo? (poder)|puderam|poderam,pôde,podiam|Vous avez pu tout faire à temps ?`,
+Vocês ___ fazer tudo a tempo? (poder)|puderam|poderam,pôde,podiam|Vous avez pu tout faire à temps ?
+Vocês ___ tempo de almoçar? (ter)|tiveram|teve,tive,tivemos|Vous avez eu le temps de déjeuner ?
+Nós ___ ao museu no sábado. (ir)|fomos|foram,fui,foi|Nous sommes allés au musée samedi.
+Vocês ___ aqui ontem à noite? (estar)|estiveram|esteve,estive,estivemos|Vous avez été ici hier soir ?
+Nós ___ a verdade afinal. (saber)|soubemos|soube,souberam,sabia|Nous avons appris la vérité finalement.`,
   }),
   n({
     id: 'imperfeito',
@@ -290,7 +321,10 @@ Todo verão a gente ___ para a casa da avó. (ir)|ia|foi,vai,iam|Chaque été on
 Enquanto eu ___, ela ligou. (cozinhar)|cozinhava|cozinhei,cozinho,cozinhavam|Pendant que je cuisinais, elle a appelé.
 ___ sol quando saímos. (fazer)|Fazia|Fez,Faz,Faziam|Il faisait beau quand nous sommes sortis.
 Vocês ___ futebol na escola? (jogar)|jogavam|jogaram,jogava,jogam|Vous jouiez au foot à l'école ?
-Eu ___ ler antes de dormir. (costumar)|costumava|costumei,costumo,costumavam|J'avais l'habitude de lire avant de dormir.`,
+Eu ___ ler antes de dormir. (costumar)|costumava|costumei,costumo,costumavam|J'avais l'habitude de lire avant de dormir.
+Vocês ___ muito juntos na escola. (brincar)|brincavam|brincava,brincávamos,brincaram|Vous jouiez beaucoup ensemble à l'école.
+Eles ___ sempre tarde para o trabalho. (chegar)|chegavam|chegava,chegou,chegaram|Ils arrivaient toujours en retard au travail.
+Nós ___ muito quando éramos crianças. (viajar)|viajávamos|viajava,viajaram,viajavam|Nous voyagions beaucoup quand nous étions enfants.`,
   }),
   n({
     id: 'imperativo',
@@ -317,7 +351,10 @@ ___ isso! Que lindo! (olhar, familier)|Olha|Olhe,Olhar,Olho|Regarde ça ! Que c'
 ___ o que eu falei. (fazer, poli)|Faça|Faz,Fazer,Faço|Faites ce que j'ai dit.
 ___ com Deus! (ir, poli)|Vá|Vai,Ir,Vou|Va avec Dieu ! (au revoir affectueux)
 ___ um pouco, já volto! (esperar, familier)|Espera|Espere,Esperar,Espero|Attends un peu, je reviens !
-___ a mesa, por favor. (pôr, poli)|Ponha|Põe,Pôr,Ponho|Mettez la table, s'il vous plaît.`,
+___ a mesa, por favor. (pôr, poli)|Ponha|Põe,Pôr,Ponho|Mettez la table, s'il vous plaît.
+___ embora, está tarde! (ir, « vamos »)|Vamos|Vai,Vão,Vou|Allons-y, il est tard !
+___ a mesa com cuidado, por favor. (pôr, poli pluriel)|Ponham|Põe,Ponha,Põem|Mettez la table avec soin, s'il vous plaît.
+___ mais baixo, por favor! (falar, poli pluriel)|Falem|Fala,Fale,Falam|Parlez plus bas, s'il vous plaît !`,
   }),
 
   n({
@@ -349,7 +386,10 @@ Embora eu ___ cansado, vou sair. (estar)|esteja|estou,está,estivesse|Bien que j
 Fala devagar para que eu ___. (entender)|entenda|entendo,entende,entender|Parle lentement pour que je comprenne.
 Não acho que ele ___ a verdade. (saber)|saiba|sabe,sabia,souber|Je ne pense pas qu'il sache la vérité.
 Meus pais querem que eu ___ medicina. (estudar)|estude|estudo,estuda,estudar|Mes parents veulent que j'étudie la médecine.
-Duvido que ela ___ hoje. (ir)|vá|vai,vou,for|Je doute qu'elle y aille aujourd'hui.`,
+Duvido que ela ___ hoje. (ir)|vá|vai,vou,for|Je doute qu'elle y aille aujourd'hui.
+É importante que nós ___ a verdade. (dizer)|digamos|diga,dizemos,disser|Il est important que nous disions la vérité.
+Espero que vocês ___ bem na viagem. (estar)|estejam|está,estamos,estiverem|J'espère que vous allez bien pendant le voyage.
+Talvez eles ___ razão. (ter)|tenham|tem,temos,tiver|Ils ont peut-être raison.`,
   }),
   n({
     id: 'subjuntivo-imperfeito',
@@ -518,7 +558,9 @@ A loja ___ fechada no feriado. (estar)|estará|estaria,está,estarão|Le magasin
 Quem ___ a sobremesa? (trazer)|trará|trazerá,traria,traz|Qui apportera le dessert ?
 Vocês ___ saudade do Brasil. (sentir)|sentirão|sentiriam,sentem,sentirá|Le Brésil vous manquera.
 ___ uma reunião às três horas. (haver)|Haverá|Haveria,Há,Haverão|Il y aura une réunion à trois heures.
-Eu te ___ amanhã. (ligar)|ligarei|ligaria,ligo,ligará|Je t'appellerai demain.`,
+Eu te ___ amanhã. (ligar)|ligarei|ligaria,ligo,ligará|Je t'appellerai demain.
+Nós ___ ao Brasil no ano que vem. (voltar)|voltaremos|voltaríamos,voltamos,voltarão|Nous retournerons au Brésil l'année prochaine.
+Vocês ___ muita saudade de casa. (sentir)|sentirão|sentiriam,sentem,sentirá|Vous manquerez beaucoup de la maison.`,
   }),
   n({
     id: 'futuro-anterior',

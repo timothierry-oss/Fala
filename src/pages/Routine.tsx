@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { allVocab } from '../data/themes'
+import { allVocab, themeById } from '../data/themes'
+import { collectionItems } from '../data/collections'
 import { challengeById } from '../data/challenges'
 import { PageHeader, ProgressBar } from '../components/ui'
 import { Counters, type Verdicts } from '../components/Counters'
@@ -9,11 +10,12 @@ import { ExerciseView } from '../components/ExerciseView'
 import { QuestionView, SLOW_MCQ, SLOW_TYPE } from '../components/SmartStudy'
 import { RoutineCloze } from '../components/RoutineCloze'
 import { RoutineTranslation } from '../components/RoutineTranslation'
+import { RoutineThemeQuiz } from '../components/RoutineThemeQuiz'
 import { LearnPhase } from './Grammar'
 import { StudySession, type Quality, type SessionSnapshot } from '../lib/memory'
 import { questionFor } from '../lib/questions'
-import { buildRoutine, type RoutineItem } from '../lib/routine'
-import { getProgress, markRoutineDone, recordExercise, recordReview, restoreProgress, setItemStage, useProgress, type ProgressState } from '../lib/store'
+import { buildRoutine, topicKeyOf, type RoutineItem } from '../lib/routine'
+import { addXp, getProgress, markRoutineDone, recordExercise, recordReview, recordServed, restoreProgress, setItemStage, useProgress, type ProgressState } from '../lib/store'
 
 const KIND_LABEL: Record<RoutineItem['kind'], string> = {
   vocab: 'Vocabulaire',
@@ -21,6 +23,19 @@ const KIND_LABEL: Record<RoutineItem['kind'], string> = {
   'learn-notion': 'Nouvelle notion',
   cloze: 'Texte à trous',
   translation: 'Traduction',
+  'theme-quiz': 'Compréhension',
+}
+
+/** Vocabulaire des thèmes + collections (hors argot) : pool de distracteurs pour les QCM de la routine. */
+const vocabPool = [...allVocab, ...collectionItems]
+
+function recordRoutineServed(items: RoutineItem[]) {
+  const keys = new Set<string>()
+  for (const item of items) {
+    const key = topicKeyOf(item)
+    if (key) keys.add(key)
+  }
+  recordServed([...keys])
 }
 
 interface Step {
@@ -36,7 +51,11 @@ export function RoutinePage() {
   const nav = useNavigate()
   useProgress() // re-rend quand la progression change (scores, etc.)
 
-  const [built, setBuilt] = useState<RoutineItem[]>(() => buildRoutine(getProgress()))
+  const [built, setBuilt] = useState<RoutineItem[]>(() => {
+    const first = buildRoutine(getProgress())
+    recordRoutineServed(first)
+    return first
+  })
   const session = useMemo(() => new StudySession(built.map((i) => i.id), { roundSize: 20, maxActive: built.length, isDone: (_id, good) => good >= 1 }), []) // eslint-disable-line react-hooks/exhaustive-deps
   const [currentId, setCurrentId] = useState<string | null>(() => session.next())
   const [turn, setTurn] = useState(0)
@@ -97,6 +116,7 @@ export function RoutinePage() {
     const more = buildRoutine(getProgress())
     const fresh = more.filter((i) => !byId.has(i.id))
     if (fresh.length) {
+      recordRoutineServed(fresh)
       session.extend(fresh.map((i) => i.id))
       setBuilt((b) => [...b, ...fresh])
     }
@@ -179,6 +199,10 @@ export function RoutinePage() {
       {current.kind === 'translation' && (
         <TranslationQuestion key={`${current.id}-${turn}-${retry}`} item={current} isRetry={isRetry} onBeforeAnswer={checkpoint} onFinish={finishAnswer} />
       )}
+
+      {current.kind === 'theme-quiz' && (
+        <ThemeQuizQuestion key={`${current.id}-${turn}-${retry}`} item={current} isRetry={isRetry} onBeforeAnswer={checkpoint} onFinish={finishAnswer} />
+      )}
     </div>
   )
 }
@@ -195,7 +219,7 @@ function VocabQuestion({
   onFinish: (ok: boolean, quality: Quality) => void
 }) {
   const stage = getProgress().memory[item.item.id]?.stage ?? 0
-  const question = useMemo(() => questionFor(item.item, stage, allVocab, 0), [item]) // eslint-disable-line react-hooks/exhaustive-deps
+  const question = useMemo(() => questionFor(item.item, stage, vocabPool, 0), [item]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <QuestionView
       q={question}
@@ -260,6 +284,35 @@ function TranslationQuestion({
         onBeforeAnswer()
         if (!isRetry) recordExercise(item.id, ok)
         onFinish(ok, ok && !slow ? 'good' : ok ? 'hard' : 'again')
+      }}
+    />
+  )
+}
+
+function ThemeQuizQuestion({
+  item,
+  isRetry,
+  onBeforeAnswer,
+  onFinish,
+}: {
+  item: Extract<RoutineItem, { kind: 'theme-quiz' }>
+  isRetry: boolean
+  onBeforeAnswer: () => void
+  onFinish: (ok: boolean, quality: Quality) => void
+}) {
+  const theme = themeById(item.themeId)
+  const question = theme?.questions[item.questionIndex]
+  if (!theme || !question) return null
+  return (
+    <RoutineThemeQuiz
+      question={question}
+      onDone={(ok) => {
+        onBeforeAnswer()
+        if (!isRetry) {
+          recordExercise(item.id, ok)
+          if (ok) addXp('vocabulaire', 6)
+        }
+        onFinish(ok, ok ? 'good' : 'again')
       }}
     />
   )

@@ -22,7 +22,6 @@ export type RoutineItem =
   | { id: string; kind: 'learn-notion'; notion: Notion }
   | { id: string; kind: 'cloze'; challengeId: string; blankIndex: number; topicId: string }
   | { id: string; kind: 'translation'; challengeId: string; index: number; topicId: string }
-  | { id: string; kind: 'theme-quiz'; themeId: string; questionIndex: number; topicId: string }
 
 interface Weighted {
   id: string
@@ -134,20 +133,6 @@ function challengeWeights(p: ProgressState, maxLevel: Level, userLevel: Level): 
       return { id: c.id, weight: Math.max(0.05, weight) }
     })
     .map(withCooldown(p, 'challenge'))
-}
-
-/** Questions de compréhension d'un thème déjà entamé, pondérées par leur taux d'échec (via `p.exercises`). */
-function themeQuizWeights(p: ProgressState): Weighted[] {
-  return themes
-    .filter((t) => stepDone(p, t.id, 'vocabulaire'))
-    .map((t) => {
-      const ids = t.questions.map((_, i) => `theme-quiz:${t.id}:${i}`)
-      const weakCount = ids.filter((id) => p.exercises[id]?.weak).length
-      const weight = ids.length ? Math.max(0.1, weakCount / ids.length || 0.2) : 0
-      return { id: t.id, weight }
-    })
-    .filter((w) => w.weight > 0)
-    .map(withCooldown(p, 'theme-quiz'))
 }
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i)
@@ -276,14 +261,6 @@ export function buildRoutine(p: ProgressState): RoutineItem[] {
     if (bIdx !== undefined) items.push({ id: `cloze:${c.id}:${bIdx}`, kind: 'cloze', challengeId: c.id, blankIndex: bIdx, topicId: c.id })
   }
 
-  // 5b) Quiz de thème : questions de compréhension des thèmes déjà entamés.
-  for (const qw of weightedSample(themeQuizWeights(p), 2)) {
-    const theme = themeById(qw.id)
-    if (!theme || !theme.questions.length) continue
-    const qIdx = pickWeightedIndex(p, theme.questions.length, (i) => `theme-quiz:${theme.id}:${i}`)
-    if (qIdx !== undefined) items.push({ id: `theme-quiz:${theme.id}:${qIdx}`, kind: 'theme-quiz', themeId: theme.id, questionIndex: qIdx, topicId: theme.id })
-  }
-
   // 6) Repli : peu d'historique (grammaire/défis vides) → on comble avec du vocabulaire du thème frontière.
   if (items.length < TARGET - 5 && frontierT) {
     for (const v of frontierT.vocab) {
@@ -308,8 +285,6 @@ export function topicKeyOf(item: RoutineItem): string | undefined {
     case 'cloze':
     case 'translation':
       return `challenge:${item.topicId}`
-    case 'theme-quiz':
-      return `theme-quiz:${item.topicId}`
     case 'learn-notion':
       return undefined
   }

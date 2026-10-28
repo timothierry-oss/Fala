@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { allVocab, themeById } from '../data/themes'
+import { allVocab } from '../data/themes'
 import { collectionItems } from '../data/collections'
 import { challengeById } from '../data/challenges'
 import { PageHeader, ProgressBar } from '../components/ui'
@@ -10,12 +10,11 @@ import { ExerciseView } from '../components/ExerciseView'
 import { QuestionView, SLOW_MCQ, SLOW_TYPE } from '../components/SmartStudy'
 import { RoutineCloze } from '../components/RoutineCloze'
 import { RoutineTranslation } from '../components/RoutineTranslation'
-import { RoutineThemeQuiz } from '../components/RoutineThemeQuiz'
 import { LearnPhase } from './Grammar'
 import { StudySession, type Quality, type SessionSnapshot } from '../lib/memory'
 import { questionFor } from '../lib/questions'
 import { buildRoutine, topicKeyOf, type RoutineItem } from '../lib/routine'
-import { addXp, getProgress, markRoutineDone, recordExercise, recordReview, recordServed, restoreProgress, setItemStage, useProgress, type ProgressState } from '../lib/store'
+import { getProgress, markRoutineDone, recordExercise, recordReview, recordServed, restoreProgress, setItemStage, useProgress, type ProgressState } from '../lib/store'
 
 const KIND_LABEL: Record<RoutineItem['kind'], string> = {
   vocab: 'Vocabulaire',
@@ -23,7 +22,6 @@ const KIND_LABEL: Record<RoutineItem['kind'], string> = {
   'learn-notion': 'Nouvelle notion',
   cloze: 'Texte à trous',
   translation: 'Traduction',
-  'theme-quiz': 'Compréhension',
 }
 
 /** Vocabulaire des thèmes + collections (hors argot) : pool de distracteurs pour les QCM de la routine. */
@@ -199,10 +197,6 @@ export function RoutinePage() {
       {current.kind === 'translation' && (
         <TranslationQuestion key={`${current.id}-${turn}-${retry}`} item={current} isRetry={isRetry} onBeforeAnswer={checkpoint} onFinish={finishAnswer} />
       )}
-
-      {current.kind === 'theme-quiz' && (
-        <ThemeQuizQuestion key={`${current.id}-${turn}-${retry}`} item={current} isRetry={isRetry} onBeforeAnswer={checkpoint} onFinish={finishAnswer} />
-      )}
     </div>
   )
 }
@@ -284,35 +278,6 @@ function TranslationQuestion({
         onBeforeAnswer()
         if (!isRetry) recordExercise(item.id, ok)
         onFinish(ok, ok && !slow ? 'good' : ok ? 'hard' : 'again')
-      }}
-    />
-  )
-}
-
-function ThemeQuizQuestion({
-  item,
-  isRetry,
-  onBeforeAnswer,
-  onFinish,
-}: {
-  item: Extract<RoutineItem, { kind: 'theme-quiz' }>
-  isRetry: boolean
-  onBeforeAnswer: () => void
-  onFinish: (ok: boolean, quality: Quality) => void
-}) {
-  const theme = themeById(item.themeId)
-  const question = theme?.questions[item.questionIndex]
-  if (!theme || !question) return null
-  return (
-    <RoutineThemeQuiz
-      question={question}
-      onDone={(ok) => {
-        onBeforeAnswer()
-        if (!isRetry) {
-          recordExercise(item.id, ok)
-          if (ok) addXp('vocabulaire', 6)
-        }
-        onFinish(ok, ok ? 'good' : 'again')
       }}
     />
   )

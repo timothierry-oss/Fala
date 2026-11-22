@@ -400,6 +400,109 @@ Tô nem aí|je m'en fiche|Pode falar o que quiser, tô nem aí.|Dis ce que tu ve
 Tanto faz|peu importe|Pizza ou hambúrguer? Tanto faz.|Pizza ou burger ? Peu importe.
 `
 
+const VERBS2 = `
+viver|vivre, habiter|Quero viver perto do mar.|Je veux vivre près de la mer.
+morrer|mourir|A planta morreu por falta de água.|La plante est morte faute d'eau.|eu morro · participe : morto · Aussi familier : « morrer de fome » (mourir de faim).
+nascer|naître|Ela nasceu em São Paulo.|Elle est née à São Paulo.
+casar|se marier|Eles vão casar em junho.|Ils vont se marier en juin.|Casar com alguém · casar-se
+namorar|sortir avec (être en couple)|Ele namora a minha irmã.|Il sort avec ma sœur.|Namorar = être en couple ; pas de « de » : namorar alguém.
+brincar|jouer (enfants), plaisanter|As crianças gostam de brincar na rua.|Les enfants aiment jouer dans la rue.|Brincar = jouer pour s'amuser ; « jogar » = jouer à un jeu/sport.
+dançar|danser|Vamos dançar forró hoje?|On va danser du forró ce soir ?
+cantar|chanter|Ela canta muito bem.|Elle chante très bien.
+tocar|toucher, jouer (instrument)|Ele toca violão desde criança.|Il joue de la guitare depuis qu'il est enfant.|tocar violão/piano · tocar no assunto (aborder un sujet)
+desenhar|dessiner|Meu filho adora desenhar.|Mon fils adore dessiner.
+pintar|peindre|Vamos pintar a sala de azul.|On va peindre le salon en bleu.
+construir|construire|Eles vão construir uma casa nova.|Ils vont construire une nouvelle maison.|eu construo · você constrói
+quebrar|casser|Eu quebrei o copo sem querer.|J'ai cassé le verre sans faire exprès.|Aussi : estar quebrado = être en panne / fauché (familier).
+consertar|réparer|Preciso consertar a bicicleta.|Je dois réparer le vélo.
+cortar|couper|Corta a cebola em pedaços pequenos.|Coupe l'oignon en petits morceaux.
+cobrir|couvrir|Cubra a panela com a tampa.|Couvre la casserole avec le couvercle.|eu cubro · participe : coberto
+encher|remplir|Pode encher o copo, por favor?|Tu peux remplir le verre, s'il te plaît ?|eu encho · Contraire : esvaziar.
+esvaziar|vider|Vou esvaziar a mala.|Je vais vider la valise.
+carregar|porter, charger|Posso carregar a sua mochila.|Je peux porter ton sac à dos.|Aussi : carregar o celular (charger le téléphone).
+puxar|tirer|Puxe a porta, não empurre.|Tire la porte, ne la pousse pas.|Sur les portes : « puxe » (tirer) / « empurre » (pousser).
+empurrar|pousser|Ajuda a empurrar o carro?|Tu aides à pousser la voiture ?
+levantar|lever, se lever|Eu levanto às seis todos os dias.|Je me lève à six heures tous les jours.|levantar (da cama) = se lever · levantar a mão = lever la main
+deitar|s'allonger, se coucher|Vou deitar um pouco.|Je vais m'allonger un peu.|deitar(-se) · Pas « dormir » : on peut se coucher sans dormir.
+caminhar|marcher, se promener|Gosto de caminhar na praia.|J'aime marcher sur la plage.
+pular|sauter|As crianças pulam na cama.|Les enfants sautent sur le lit.|Pular carnaval = faire la fête pendant le carnaval.
+nadar|nager|Você sabe nadar?|Tu sais nager ?
+voar|voler (dans les airs)|Vamos voar para o Rio amanhã.|On va prendre l'avion pour Rio demain.|eu voo
+dirigir|conduire|Ele dirige muito bem.|Il conduit très bien.|eu dirijo · Aussi : « dirigir um carro ».
+estacionar|garer, se garer|Onde posso estacionar?|Où est-ce que je peux me garer ?
+atravessar|traverser|Cuidado ao atravessar a rua.|Fais attention en traversant la rue.
+seguir|suivre|Siga em frente até o semáforo.|Continuez tout droit jusqu'au feu.|eu sigo · você segue · Aussi : seguir alguém (no Instagram).
+virar|tourner, devenir|Vire à direita na esquina.|Tourne à droite au coin de la rue.|virar = tourner ET devenir (familier) : virar médico.
+visitar|rendre visite, visiter|Vamos visitar a vovó no domingo.|On va rendre visite à mamie dimanche.
+reservar|réserver|Já reservei uma mesa para oito horas.|J'ai déjà réservé une table pour huit heures.
+cancelar|annuler|Tive que cancelar a viagem.|J'ai dû annuler le voyage.
+medir|mesurer|Vou medir a mesa.|Je vais mesurer la table.|eu meço · você mede
+calcular|calculer|Vamos calcular quanto custa.|On va calculer combien ça coûte.
+economizar|économiser|Preciso economizar este mês.|Je dois économiser ce mois-ci.
+custar|coûter|Quanto custa esse casaco?|Combien coûte ce manteau ?|Custar caro = coûter cher.
+valer|valoir|Vale a pena visitar o museu.|Ça vaut le coup de visiter le musée.|eu valho · « Vale a pena » = ça vaut la peine · « Vale! » = d'accord (familier).
+emprestar|prêter, emprunter|Você pode me emprestar o carregador?|Tu peux me prêter le chargeur ?|Emprestar = prêter ET emprunter selon le contexte.
+devolver|rendre, restituer|Preciso devolver este livro.|Je dois rendre ce livre.|eu devolvo
+alugar|louer|Vamos alugar um carro na viagem.|On va louer une voiture pendant le voyage.|Alugar = louer (en tant que locataire ou propriétaire).
+trocar|échanger, changer|Posso trocar este tamanho?|Je peux changer cette taille ?|trocar de roupa = se changer · trocar dinheiro = changer de l'argent
+enviar|envoyer|Vou enviar o arquivo por e-mail.|Je vais envoyer le fichier par e-mail.|Plus formel que « mandar ».
+guardar|garder, ranger|Guarde o recibo, por favor.|Garde le reçu, s'il te plaît.|Aussi : guardar segredo (garder un secret).
+apagar|éteindre, effacer|Não esqueça de apagar a luz.|N'oublie pas d'éteindre la lumière.|apagar a luz = éteindre · apagar um arquivo = effacer
+acender|allumer|Pode acender a luz?|Tu peux allumer la lumière ?|eu acendo
+desligar|éteindre, raccrocher|Desliga a TV, por favor.|Éteins la télé, s'il te plaît.|Contraire de « ligar » (allumer / appeler).
+funcionar|fonctionner|O elevador não está funcionando.|L'ascenseur ne fonctionne pas.
+baixar|baisser, télécharger|Vou baixar o aplicativo.|Je vais télécharger l'appli.|baixar a voz = baisser la voix · baixar um app = télécharger
+salvar|sauvegarder, sauver|Não esqueça de salvar o arquivo.|N'oublie pas de sauvegarder le fichier.
+copiar|copier|Pode copiar o link para mim?|Tu peux me copier le lien ?
+imprimir|imprimer|Preciso imprimir o bilhete.|Je dois imprimer le billet.
+gravar|enregistrer|Vou gravar um áudio para você.|Je vais t'enregistrer un message vocal.|gravar um áudio/vídeo
+assinar|signer, s'abonner|Assine aqui, por favor.|Signez ici, s'il vous plaît.|assinar um contrato · assinar um serviço (s'abonner)
+preencher|remplir (un formulaire)|Preencha o formulário com seus dados.|Remplis le formulaire avec tes données.|eu preencho · « Encher » = remplir un récipient ; « preencher » = remplir un document.
+marcar|fixer (rendez-vous), marquer|Vamos marcar um café?|On se fixe un café ?|marcar um horário = prendre rendez-vous · marcar um gol = marquer un but
+combinar|se mettre d'accord, convenir|Combinado! Nos vemos às sete.|D'accord ! On se voit à sept heures.|« Combinado! » = c'est entendu ! · « Vamos combinar » = on s'organise.
+convidar|inviter|Vou convidar vocês para o jantar.|Je vais vous inviter à dîner.
+aceitar|accepter|Você aceita cartão?|Vous acceptez la carte ?
+recusar|refuser|Ele recusou a oferta.|Il a refusé l'offre.|Plus courant à l'oral : « dizer não ».
+concordar|être d'accord|Eu concordo com você.|Je suis d'accord avec toi.|concordar com alguém/algo
+discutir|discuter, se disputer|Não quero discutir com você.|Je ne veux pas me disputer avec toi.|Attention : discutir = débattre OU se disputer.
+brigar|se disputer, se battre|Eles brigam o tempo todo.|Ils se disputent tout le temps.|brigar com alguém
+desculpar|excuser|Desculpe o atraso!|Excuse mon retard !|« Desculpa! » = pardon ! · « Me desculpe » = excuse-moi.
+perdoar|pardonner|Eu te perdoo.|Je te pardonne.|eu perdoo
+agradecer|remercier|Quero agradecer a sua ajuda.|Je veux te remercier pour ton aide.|agradecer a alguém por algo
+cumprimentar|saluer|Ele cumprimentou todo mundo.|Il a salué tout le monde.|Au Brésil on salue souvent avec un bisou ou une accolade.
+apresentar|présenter|Deixa eu apresentar minha amiga.|Laisse-moi te présenter mon amie.
+prometer|promettre|Eu prometo que volto cedo.|Je promets que je reviens tôt.
+mentir|mentir|Não minta para mim.|Ne me mens pas.|eu minto · você mente
+confiar|faire confiance|Eu confio em você.|Je te fais confiance.|confiar em alguém
+duvidar|douter|Duvido que ele venha.|Je doute qu'il vienne.|Duvidar que + subjonctif.
+imaginar|imaginer|Imagina só!|Imagine un peu !|« Imagina! » = de rien / pas du tout (réponse à un merci).
+sonhar|rêver|Ontem sonhei com você.|Hier j'ai rêvé de toi.|sonhar com alguém/algo
+desejar|souhaiter|Desejo uma boa viagem para você.|Je te souhaite un bon voyage.
+preferir|préférer|Prefiro café a chá.|Je préfère le café au thé.|eu prefiro · preferir A a B
+odiar|détester, haïr|Eu odeio acordar cedo.|Je déteste me lever tôt.|eu odeio
+admirar|admirer|Eu admiro muito o seu trabalho.|J'admire beaucoup ton travail.
+parecer|sembler, ressembler|Parece que vai chover.|On dirait qu'il va pleuvoir.|eu pareço · parecer com alguém = ressembler à qqn
+existir|exister|Existe um banco por aqui?|Est-ce qu'il y a une banque par ici ?|Existe/existem = il y a (plus formel que « tem »).
+faltar|manquer|Falta pouco para terminar.|Il reste peu à faire pour finir.|Falta + qqch = il manque/il reste · Faltam dez minutos.
+sobrar|rester, être en trop|Sobrou pizza de ontem.|Il est resté de la pizza d'hier.
+servir|servir, convenir|Esse tamanho não serve.|Cette taille ne convient pas.|eu sirvo · você serve
+bastar|suffire|Basta ligar para ele.|Il suffit de l'appeler.|« Basta! » = ça suffit !
+importar|importer|Não importa!|Peu importe !|« Não importa » = ça n'a pas d'importance · importar (produits) = importer
+doer|faire mal|Minha cabeça está doendo.|J'ai mal à la tête.|dói · doem · « Está doendo » = ça fait mal en ce moment.
+cansar|fatiguer, se fatiguer|Eu me cansei de esperar.|Je me suis lassé d'attendre.|cansar(-se) = se fatiguer ou se lasser · estar cansado
+melhorar|améliorer, aller mieux|Espero que você melhore logo.|J'espère que tu iras mieux bientôt.
+piorar|empirer|A situação só piorou.|La situation n'a fait qu'empirer.
+crescer|grandir, croître|Ele cresceu muito neste ano.|Il a beaucoup grandi cette année.|eu cresço
+engordar|grossir|Engordei dois quilos nas férias.|J'ai pris deux kilos pendant les vacances.
+emagrecer|maigrir|Quero emagrecer um pouco.|Je veux perdre un peu de poids.|eu emagreço
+cheirar|sentir (odeur), renifler|Está cheirando a queimado.|Ça sent le brûlé.|cheirar bem/mal · « cheirar a » + nom
+provar|goûter, essayer, prouver|Prova esse bolo!|Goûte ce gâteau !|provar comida = goûter · provar roupa = essayer des vêtements
+respirar|respirer|Respire fundo e relaxe.|Respire profondément et détends-toi.
+aproveitar|profiter|Aproveite as férias!|Profite de tes vacances !|« Aproveita! » = profites-en !
+organizar|organiser|Vou organizar uma festa.|Je vais organiser une fête.
+treinar|s'entraîner, entraîner|Eu treino na academia três vezes por semana.|Je m'entraîne à la salle trois fois par semaine.
+`
+
 interface Source {
   id: string
   title: string
@@ -414,6 +517,7 @@ interface Source {
 
 const sources: Source[] = [
   { id: 'verbes', title: '100 verbes essentiels', short: 'Verbes', emoji: '🏃', cat: 'verbe', prefix: 'verbe', raw: VERBS.join('\n') },
+  { id: 'verbes-2', title: '100 verbes essentiels n°2', short: 'Verbes n°2', emoji: '🚶', cat: 'verbe', prefix: 'verbe2', raw: VERBS2 },
   { id: 'adverbes', title: 'Adverbes utiles', emoji: '⏱️', cat: 'adverbe', prefix: 'adverbe', raw: ADVERBS },
   { id: 'expressions', title: 'Expressions idiomatiques', emoji: '🗣️', cat: 'expression', prefix: 'idiome', raw: IDIOMS },
   { id: 'adjectifs', title: '50 adjectifs essentiels', short: 'Adjectifs', emoji: '🎨', cat: 'adjectif', prefix: 'adjectif', raw: ADJECTIVES.join('\n') },

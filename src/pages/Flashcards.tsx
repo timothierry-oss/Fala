@@ -1,14 +1,14 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { Check, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { allVocab, themes } from '../data/themes'
 import { collectionItems, collections, groups } from '../data/collections'
 import { PageHeader, SpeakButton } from '../components/ui'
 import { PhaseBar } from '../components/PhaseBar'
-import { SmartStudy, type StudyMode } from '../components/SmartStudy'
+import { ClassicCards, SmartStudy, type StudyMode } from '../components/SmartStudy'
 import { allItems, customDecks, deckStats, getDeck, slangItems, type Deck } from '../lib/decks'
 import { PHASE_LABEL, phaseOf } from '../lib/memory'
-import { completeStep, dueToday, getProgress, removeCustomWord, unretireItem, useProgress, type ProgressState } from '../lib/store'
+import { completeStep, dueToday, getProgress, removeCustomWord, retireItem, unretireItem, useProgress, type ProgressState } from '../lib/store'
 import { NotFound } from './NotFound'
 
 function DeckCard({ deck, p, to, subtitle }: { deck: Deck; p: ProgressState; to?: string; subtitle?: string }) {
@@ -128,6 +128,21 @@ export function DeckPage() {
   const p = useProgress()
   const [params, setParams] = useSearchParams()
   const mode = (params.get('mode') as StudyMode | 'liste') || 'apprendre'
+  const [cardsClassic, setCardsClassic] = useState(() => {
+    try {
+      return localStorage.getItem('fala-cards-mode') === 'classic'
+    } catch {
+      return false
+    }
+  })
+  const pickCards = (classic: boolean) => {
+    setCardsClassic(classic)
+    try {
+      localStorage.setItem('fala-cards-mode', classic ? 'classic' : 'smart')
+    } catch {
+      /* ignore */
+    }
+  }
   // Le contenu de la fiche est figé à l'ouverture pour ne pas changer pendant la session.
   const deck = useMemo(() => getDeck(deckId ?? '', getProgress()), [deckId])
   const pool = useMemo(() => {
@@ -138,6 +153,9 @@ export function DeckPage() {
     if (deck.kind === 'collection') return collectionItems.filter((i) => i.cat === deck.items[0]?.cat)
     return allItems(getProgress())
   }, [deck])
+
+  // Liste figée à l'ouverture du mode classique : les mots « maîtrisés » en sont exclus.
+  const classicItems = useMemo(() => (deck ? deck.items.filter((v) => !getProgress().memory[v.id]?.retired) : []), [deck, cardsClassic]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!deck) return <NotFound />
   const group = collections.find((c) => c.id === deck.id)?.group ?? groups.find((g) => g.id === deck.id)?.id
@@ -155,6 +173,16 @@ export function DeckPage() {
           </button>
         ))}
       </div>
+      {mode === 'cartes' && deck.items.length > 0 && (
+        <div className="segmented small" role="tablist">
+          <button role="tab" aria-selected={!cardsClassic} className={!cardsClassic ? 'active' : ''} onClick={() => pickCards(false)}>
+            Intelligent
+          </button>
+          <button role="tab" aria-selected={cardsClassic} className={cardsClassic ? 'active' : ''} onClick={() => pickCards(true)}>
+            Classique
+          </button>
+        </div>
+      )}
       {deck.items.length === 0 ? (
         <div className="card result">
           <div className="result-emoji">✨</div>
@@ -178,7 +206,12 @@ export function DeckPage() {
                     Connu · réintégrer
                   </button>
                 ) : (
-                  <span className={`phase-pill ph-${ph}`}>{PHASE_LABEL[ph]}</span>
+                  <>
+                    <span className={`phase-pill ph-${ph}`}>{PHASE_LABEL[ph]}</span>
+                    <button className="btn btn-ghost small" onClick={() => retireItem(v.id)} title="Classer ce mot comme maîtrisé : il n’apparaîtra plus dans les révisions">
+                      <Check size={14} /> Maîtrisé
+                    </button>
+                  </>
                 )}
                 <SpeakButton text={v.pt} small />
                 {isCustom && (
@@ -190,6 +223,17 @@ export function DeckPage() {
             )
           })}
         </div>
+      ) : mode === 'cartes' && cardsClassic ? (
+        deck.items.every((v) => p.memory[v.id]?.retired) ? (
+          <div className="card result">
+            <div className="result-emoji">🏆</div>
+            <h2>Tous les mots sont maîtrisés</h2>
+            <p className="muted">Réintègre des mots depuis l’onglet Liste pour les revoir.</p>
+          </div>
+        ) : (
+          // Les mots classés « maîtrisés » sont exclus ; la liste est figée à l'ouverture de la session.
+          <ClassicCards key="classic" deckId={deck.id} items={classicItems} />
+        )
       ) : (
         <SmartStudy
           key={mode}

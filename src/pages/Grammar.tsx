@@ -357,22 +357,120 @@ export function LearnPhase({ notion, onClose }: { notion: Notion; onClose: () =>
   )
 }
 
-/** Session intelligente sur une liste d'exercices : QCM tant que l'exercice est nouveau, puis écrit. */
-function ExerciseSession({
-  exercises,
-  isDone,
-  title,
-  eyebrow,
-  onFinished,
-  onClose,
-}: {
+type SessionMode = 'smart' | 'classic'
+const MODE_KEY = 'fala-exercise-mode'
+const readMode = (): SessionMode => {
+  try {
+    return localStorage.getItem(MODE_KEY) === 'classic' ? 'classic' : 'smart'
+  } catch {
+    return 'smart'
+  }
+}
+
+function ModeSwitch({ mode, onChange }: { mode: SessionMode; onChange: (m: SessionMode) => void }) {
+  return (
+    <div className="segmented" role="tablist">
+      <button role="tab" aria-selected={mode === 'smart'} className={mode === 'smart' ? 'active' : ''} onClick={() => onChange('smart')}>
+        Intelligent
+      </button>
+      <button role="tab" aria-selected={mode === 'classic'} className={mode === 'classic' ? 'active' : ''} onClick={() => onChange('classic')}>
+        Classique
+      </button>
+    </div>
+  )
+}
+
+type SessionProps = {
   exercises: Exercise[]
   isDone: (id: string, good: number) => boolean
   title: string
   eyebrow: string
   onFinished: () => void
   onClose: () => void
-}) {
+}
+
+/** Session d'exercices avec choix du mode : intelligent (adaptatif) ou classique (une passe, au choix QCM / écrit). */
+function ExerciseSession(props: SessionProps) {
+  const [mode, setMode] = useState<SessionMode>(readMode)
+  const change = (m: SessionMode) => {
+    try {
+      localStorage.setItem(MODE_KEY, m)
+    } catch {
+      /* ignore */
+    }
+    setMode(m)
+  }
+  const switcher = <ModeSwitch mode={mode} onChange={change} />
+  return mode === 'smart' ? <SmartExerciseSession key="smart" {...props} switcher={switcher} /> : <ClassicExerciseSession key="classic" {...props} switcher={switcher} />
+}
+
+/** Mode classique : on parcourt tous les exercices une fois, dans l'ordre, au format choisi. */
+function ClassicExerciseSession({ exercises, title, eyebrow, onClose, switcher }: SessionProps & { switcher: React.ReactNode }) {
+  const [format, setFormat] = useState<'choice' | 'type'>('choice')
+  const [i, setI] = useState(0)
+  const [score, setScore] = useState(0)
+  const ex = exercises[i]
+  if (!ex) {
+    return (
+      <div className="page narrow">
+        <div className="card result">
+          <div className="result-emoji">🏁</div>
+          <h2>
+            Terminé : {score} / {exercises.length}
+          </h2>
+          <p className="muted">Le mode classique ne valide pas la phase : passe en mode intelligent pour la valider.</p>
+          <div className="row gap center wrap">
+            <button className="btn btn-ghost" onClick={() => { setI(0); setScore(0) }}>
+              Recommencer
+            </button>
+            <button className="btn btn-primary" onClick={onClose}>
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="page narrow">
+      <PageHeader eyebrow={eyebrow} title={title} right={<span className="muted small">{i + 1} / {exercises.length}</span>} />
+      {switcher}
+      <div className="segmented small" role="tablist">
+        <button role="tab" aria-selected={format === 'choice'} className={format === 'choice' ? 'active' : ''} onClick={() => setFormat('choice')}>
+          QCM
+        </button>
+        <button role="tab" aria-selected={format === 'type'} className={format === 'type' ? 'active' : ''} onClick={() => setFormat('type')}>
+          Écrit
+        </button>
+      </div>
+      <ProgressBar value={i / exercises.length} />
+      <ExerciseView
+        key={`${ex.id}-${format}`}
+        e={ex}
+        mode={format}
+        onDone={(ok) => {
+          recordExercise(ex.id, ok)
+          if (ok) setScore((s) => s + 1)
+          setI(i + 1)
+        }}
+      />
+      <button className="btn btn-ghost block" onClick={onClose}>
+        Arrêter pour l’instant
+      </button>
+    </div>
+  )
+}
+
+/** Mode intelligent : QCM tant que l'exercice est nouveau, puis écrit. */
+function SmartExerciseSession({
+  exercises,
+  isDone,
+  title,
+  eyebrow,
+  onFinished,
+  onClose,
+  switcher,
+}: SessionProps & { switcher: React.ReactNode }) {
   const session = useMemo(() => new StudySession(exercises.map((e) => e.id), { roundSize: 15, maxActive: 5, isDone }), []) // eslint-disable-line react-hooks/exhaustive-deps
   const [current, setCurrent] = useState(() => session.next())
   const [turn, setTurn] = useState(0)
@@ -451,6 +549,7 @@ function ExerciseSession({
   return (
     <div className="page narrow">
       <PageHeader eyebrow={eyebrow} title={title} right={<span className="muted small">{total - remaining} / {total} réussis</span>} />
+      {switcher}
       <div className="study-top">
         <UndoButton onClick={undo} disabled={!pending && undoStack.size === 0} />
         <ProgressBar value={(total - remaining) / total} />

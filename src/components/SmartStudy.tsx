@@ -272,6 +272,105 @@ export function SmartStudy({
   )
 }
 
+const missedKey = (deckId: string) => `fala-classic-missed:${deckId}`
+function loadMissed(deckId: string): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(missedKey(deckId)) ?? '[]')
+    return Array.isArray(v) ? v : []
+  } catch {
+    return []
+  }
+}
+function saveMissed(deckId: string, ids: string[]) {
+  try {
+    localStorage.setItem(missedKey(deckId), JSON.stringify(ids))
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Mode classique des cartes : on parcourt les cartes sans algorithme. Les cartes « à revoir » sont mémorisées
+ * par fiche : à la session suivante, seules celles-ci sont proposées (jusqu'à ce qu'elles soient sues).
+ * N'altère pas la mémoire des mots.
+ */
+export function ClassicCards({ deckId, items }: { deckId: string; items: StudyItem[] }) {
+  const [onlyMissed, setOnlyMissed] = useState(true)
+  const [session, setSession] = useState(0)
+  const initial = useMemo(() => {
+    const saved = new Set(loadMissed(deckId))
+    const missed = items.filter((v) => saved.has(v.id))
+    return onlyMissed && missed.length ? missed : items
+  }, [deckId, items, onlyMissed, session]) // eslint-disable-line react-hooks/exhaustive-deps
+  const filtered = initial.length < items.length
+  const [i, setI] = useState(0)
+  const [known, setKnown] = useState(0)
+  const item = initial[i]
+  const restart = (all: boolean) => {
+    setOnlyMissed(!all)
+    setSession((n) => n + 1)
+    setI(0)
+    setKnown(0)
+  }
+  const remaining = items.filter((v) => loadMissed(deckId).includes(v.id)).length
+
+  if (!item) {
+    return (
+      <div className="card result">
+        <div className="result-emoji">{remaining ? '🏁' : '🏆'}</div>
+        <h2>
+          {known} / {initial.length} connues
+        </h2>
+        <p className="muted">
+          {remaining ? `${remaining} carte${remaining > 1 ? 's' : ''} à revoir mémorisée${remaining > 1 ? 's' : ''} pour la prochaine fois.` : 'Plus aucune carte à revoir.'}{' '}
+          Le mode classique ne modifie pas ta progression.
+        </p>
+        <div className="row gap wrap center">
+          {remaining > 0 && (
+            <button className="btn btn-primary" onClick={() => restart(false)}>
+              Revoir les {remaining} à revoir
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={() => restart(true)}>
+            Toutes les cartes ({items.length})
+          </button>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="study">
+      {filtered && (
+        <p className="retry-note">
+          Seulement les cartes à revoir ({initial.length}) ·{' '}
+          <button className="btn-link" onClick={() => restart(true)}>
+            Voir toutes les cartes
+          </button>
+        </p>
+      )}
+      <div className="study-top">
+        <ProgressBar value={i / initial.length} />
+        <span className="muted small">
+          {i + 1} / {initial.length}
+        </span>
+      </div>
+      <FlipCard
+        key={`${item.id}-${i}-${session}`}
+        item={item}
+        stage={0}
+        turn={0}
+        onGrade={(q) => {
+          const saved = loadMissed(deckId).filter((id) => id !== item.id)
+          if (q === 'again') saved.push(item.id)
+          else setKnown((k) => k + 1)
+          saveMissed(deckId, saved)
+          setI(i + 1)
+        }}
+      />
+    </div>
+  )
+}
+
 function HighlightedSentence({ h }: { h: Highlight }) {
   return (
     <p className="context">
